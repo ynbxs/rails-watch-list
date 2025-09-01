@@ -1,0 +1,116 @@
+<div class="container my-4">
+  <!-- Header -->
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 m-0"><%= @list.name %></h1>
+    <div class="d-flex gap-2">
+      <%= link_to "Back to lists", lists_path, class: "btn btn-outline-secondary" %>
+      <%= link_to "Delete list", list_path(@list),
+                  class: "btn btn-danger",
+                  data: { turbo_method: :delete, turbo_confirm: "Are you sure you want to delete this list?" } %>
+    </div>
+  </div>
+
+  <!-- Movies section -->
+  <h2 class="h5 mb-3">Movies in this list</h2>
+  <% if @list.bookmarks.any? %>
+    <div class="row g-3 mb-4">
+      <% @list.bookmarks.includes(:movie).each do |bookmark| %>
+        <div class="col-12">
+          <div class="card shadow-sm">
+            <div class="card-body d-flex flex-column">
+              <div class="d-flex justify-content-between align-items-start">
+                <h3 class="h6 m-0"><%= bookmark.movie.title %></h3>
+                <%= link_to "Remove",
+                      bookmark_path(bookmark),
+                      class: "btn btn-sm btn-outline-danger",
+                      data: { turbo_method: :delete, turbo_confirm: "Remove this bookmark?" } %>
+              </div>
+              <p class="text-muted mb-0"><%= bookmark.comment %></p>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="text-muted mb-4">No movies yet. Add one!</div>
+  <% end %>
+
+  <!-- Add movie (inline) -->
+  <div class="card shadow-sm mb-5">
+    <div class="card-body">
+      <h2 class="h6 mb-3">Add a movie</h2>
+
+      <% if @bookmark.errors.any? %>
+        <div class="alert alert-danger">
+          <ul class="mb-0">
+            <% @bookmark.errors.full_messages.each do |msg| %>
+              <li><%= msg %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <%= simple_form_for [@list, @bookmark] do |f| %>
+        <%= f.input :movie_id,
+                    collection: Movie.order(:title),
+                    label_method: :title,
+                    value_method: :id,
+                    include_blank: "Choose a movie",
+                    label: "Movie" %>
+        <%= f.input :comment, placeholder: "Why this movie?" %>
+        <%= f.button :submit, "Save", class: "btn btn-primary" %>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Reviews (for the LIST, shown UNDER the movies) -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <h2 class="h5 mb-3">Reviews</h2>
+
+      <% if @list.reviews.any? %>
+        <ul class="list-group list-group-flush">
+          <% @list.reviews.order(created_at: :desc).each do |review| %>
+            <li class="list-group-item d-flex justify-content-between align-items-start">
+              <div>
+                <% if review.rating.present? %>
+                  <span class="me-1">[<%= review.rating %>/5]</span>
+                <% end %>
+                <%= review.content %>
+              </div>
+              <%= link_to "Delete",
+                    list_review_path(@list, review),
+                    class: "btn btn-sm btn-outline-danger",
+                    data: { turbo_method: :delete, turbo_confirm: "Delete this review?" } %>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <div class="text-muted">No reviews yet.</div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Add review (list-level) -->
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h3 class="h6 mb-3">Leave a review</h3>
+
+      <% if @review.errors.any? %>
+        <div class="alert alert-danger">
+          <ul class="mb-0">
+            <% @review.errors.full_messages.each do |msg| %>
+              <li><%= msg %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <%= simple_form_for [@list, @review] do |f| %>
+        <%= f.input :rating, as: :integer, input_html: { min: 0, max: 5, step: 1 } %>
+        <%= f.input :content, placeholder: "What did you think of this collection?" %>
+        <%= f.button :submit, "Post review", class: "btn btn-primary" %>
+      <% end %>
+    </div>
+  </div>
+</div>

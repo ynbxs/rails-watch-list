@@ -1,0 +1,20 @@
+<div class="container my-4">
+  <div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h1 class="h4 mb-4">Create a new list</h1>
+
+          <%= simple_form_for @list do |f| %>
+            <%= f.input :name, placeholder: "e.g. Drama, Classics…" %>
+            <%= f.button :submit, "Create list", class: "btn btn-primary" %>
+          <% end %>
+
+          <div class="mt-3">
+            <%= link_to "Back", lists_path, class: "btn btn-outline-secondary btn-sm" %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
